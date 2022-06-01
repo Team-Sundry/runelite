@@ -16,9 +16,11 @@ public class TilemanGameRules implements Serializable {
     @Setter private boolean tilesFromTotalLevel;
     @Setter private int tilesOffset;
 
+    @Getter @Setter private String groupServerURL;
+
     public TilemanGameRules() {}
 
-    public TilemanGameRules(TilemanGameMode gameMode, boolean enableCustomGameMode, boolean allowTileDeficit, boolean tilesFromTotalLevel, boolean tilesFromExp, int tilesOffset, int expPerTile) {
+    public TilemanGameRules(TilemanGameMode gameMode, boolean enableCustomGameMode, boolean allowTileDeficit, boolean tilesFromTotalLevel, boolean tilesFromExp, int tilesOffset, int expPerTile, String serverURL) {
         this.gameMode = gameMode;
         this.enableCustomGameMode = enableCustomGameMode;
         this.allowTileDeficit = allowTileDeficit;
@@ -26,6 +28,7 @@ public class TilemanGameRules implements Serializable {
         this.tilesFromExp = tilesFromExp;
         this.tilesOffset = tilesOffset;
         this.expPerTile = expPerTile;
+        this.groupServerURL = serverURL;
     }
 
     public static TilemanGameRules GetDefaultRules() {
@@ -36,7 +39,8 @@ public class TilemanGameRules implements Serializable {
                 false,
                 true,
                 9,
-                1000
+                1000,
+                ""
         );
     }
 

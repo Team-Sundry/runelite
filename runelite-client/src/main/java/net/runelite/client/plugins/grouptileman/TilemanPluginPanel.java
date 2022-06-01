@@ -78,6 +78,7 @@ public class TilemanPluginPanel extends PluginPanel {
             bodyPanel.add(buildProfilePanel());
             bodyPanel.add(buildGameRulesPanel());
             bodyPanel.add(buildAdvancedOptionsPanel());
+            bodyPanel.add(buildGroupOptionsPanel());
 
             this.add(bodyPanel, BorderLayout.CENTER);
         }
@@ -236,6 +237,7 @@ public class TilemanPluginPanel extends PluginPanel {
         }
 
         callbacks.forEach(func -> func.run());
+
         return gameRulesPanel;
     }
 
@@ -286,6 +288,40 @@ public class TilemanPluginPanel extends PluginPanel {
             });
         }
         return advancedOptions;
+    }
+
+    private JPanel buildGroupOptionsPanel() {
+        JPanel groupOptionsPanel = new JPanel();
+        groupOptionsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+
+        {
+            groupOptionsPanel.setBackground(ColorScheme.DARK_GRAY_COLOR);
+            addVerticalLayout(groupOptionsPanel);
+
+            JPanel urlPanel = new JPanel();
+            addVerticalLayout(urlPanel);
+            addSpacer(urlPanel);
+            JLabel urlLabel = new JLabel("Group URL");
+            urlLabel.setAlignmentX(CENTER_ALIGNMENT);
+            urlPanel.add(urlLabel);
+            addSpacer(urlPanel);
+            JTextField urlTextField = new JTextField(20);
+            urlPanel.add(urlTextField);
+            groupOptionsPanel.add(urlPanel);
+
+            JButton connectButton = new JButton("Connect");
+            connectButton.setAlignmentX(CENTER_ALIGNMENT);
+
+            connectButton.addActionListener(l -> {
+                connectButton.setText("Working...");
+                connectButton.setEnabled(false);
+                urlTextField.setEnabled(false);
+            });
+
+            groupOptionsPanel.add(connectButton);
+        }
+
+        return groupOptionsPanel;
     }
 
     private void showProfileImportPanel() {
