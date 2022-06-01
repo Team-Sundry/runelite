@@ -49,11 +49,11 @@ public class TilemanGameRules implements Serializable {
     }
 
     public boolean isAllowTileDeficit() {
-        return enableCustomGameMode ? allowTileDeficit : false;
+        return enableCustomGameMode && allowTileDeficit;
     }
 
     public boolean isTilesFromExp() {
-        return enableCustomGameMode ? tilesFromExp : true;
+        return !enableCustomGameMode || tilesFromExp;
     }
 
     public int getExpPerTile() {
@@ -63,6 +63,7 @@ public class TilemanGameRules implements Serializable {
     private boolean getTilesFromTotalLevelByGameMode() {
         switch (gameMode) {
             case ACCELERATED:
+            case GROUP:
                 return true;
             default:
                 return false;
