@@ -164,7 +164,10 @@ public class TilemanPluginPanel extends PluginPanel {
 
                     JComboBox gameModeSelect = new JComboBox(TilemanGameMode.values());
                     gameModeSelect.setSelectedItem(profileManager.getGameMode());
-                    gameModeSelect.addActionListener(l -> profileManager.setGameMode((TilemanGameMode) gameModeSelect.getSelectedItem()));
+                    gameModeSelect.addActionListener(l -> {
+                        profileManager.setGameMode((TilemanGameMode) gameModeSelect.getSelectedItem());
+                        rebuild();
+                    });
 
                     gameModeDropdownPanel.add(gameModeSelectLabel);
                     gameModeDropdownPanel.add(gameModeSelect);
@@ -291,6 +294,9 @@ public class TilemanPluginPanel extends PluginPanel {
     }
 
     private JPanel buildGroupOptionsPanel() {
+        if(profileManager.getGameMode() != TilemanGameMode.GROUP || !plugin.isLoggedIn())
+            return new JPanel();
+
         JPanel groupOptionsPanel = new JPanel();
         groupOptionsPanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
