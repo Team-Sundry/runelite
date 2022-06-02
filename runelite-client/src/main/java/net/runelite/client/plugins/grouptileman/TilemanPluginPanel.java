@@ -294,7 +294,8 @@ public class TilemanPluginPanel extends PluginPanel {
     }
 
     private JPanel buildGroupOptionsPanel() {
-        if(profileManager.getGameMode() != TilemanGameMode.GROUP || !plugin.isLoggedIn())
+        TilemanProfile activeProfile = profileManager.getActiveProfile();
+        if(profileManager.getGameMode() != TilemanGameMode.GROUP || activeProfile.equals(TilemanProfile.NONE))
             return new JPanel();
 
         JPanel groupOptionsPanel = new JPanel();
