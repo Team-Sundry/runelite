@@ -71,6 +71,8 @@ public class TilemanModePlugin extends Plugin {
     @Inject private TileInfoOverlay infoOverlay;
     @Inject private ClientToolbar clientToolbar;
 
+    @Inject private TilemanNetwork networkManager;
+
     @Provides
     TilemanModeConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(TilemanModeConfig.class);
@@ -237,7 +239,7 @@ public class TilemanModePlugin extends Plugin {
         initializeTotalTilesUsed();
         updateTileInfoDisplay();
         log.debug("startup");
-        TilemanPluginPanel panel = new TilemanPluginPanel(this, client, profileManager);
+        TilemanPluginPanel panel = new TilemanPluginPanel(this, client, profileManager, networkManager);
         NavigationButton navButton = NavigationButton.builder()
                 .tooltip("Tileman Import")
                 .icon(ImageUtil.getResourceStreamFromClass(getClass(), "/icon.png"))

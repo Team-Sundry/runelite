@@ -28,15 +28,17 @@ public class TilemanPluginPanel extends PluginPanel {
     private final TilemanModePlugin plugin;
     private final TilemanProfileManager profileManager;
     private final Client client;
+    private final TilemanNetwork networkManager;
 
     private boolean showExportInfo = false;
     private boolean gameModeOpen = false;
     private boolean advancedOpen = false;
 
-    public TilemanPluginPanel(TilemanModePlugin plugin, Client client, TilemanProfileManager profileManager) {
+    public TilemanPluginPanel(TilemanModePlugin plugin, Client client, TilemanProfileManager profileManager, TilemanNetwork network) {
         this.plugin = plugin;
         this.client = client;
         this.profileManager = profileManager;
+        this.networkManager = network;
         build();
     }
 
@@ -319,10 +321,34 @@ public class TilemanPluginPanel extends PluginPanel {
             JButton connectButton = new JButton("Connect");
             connectButton.setAlignmentX(CENTER_ALIGNMENT);
 
-            connectButton.addActionListener(l -> {
-                connectButton.setText("Working...");
-                connectButton.setEnabled(false);
+            if(networkManager.isConnected())
+            {
+                connectButton.setText("Disconnect");
                 urlTextField.setEnabled(false);
+                urlTextField.setText(networkManager.getAddress());
+            }
+
+            connectButton.addActionListener(l -> {
+                if(!networkManager.isConnected()) {
+                    connectButton.setText("Working...");
+                    connectButton.setEnabled(false);
+                    urlTextField.setEnabled(false);
+
+                    if (networkManager.connect(urlTextField.getText(), client.getAccountHash())) {
+                        connectButton.setText("Disconnect");
+                        connectButton.setEnabled(true);
+                    } else {
+                        connectButton.setText("Connect");
+                        connectButton.setEnabled(true);
+                        urlTextField.setEnabled(true);
+                    }
+                }
+                else {
+                    networkManager.disconnect();
+                    connectButton.setText("Connect");
+                    connectButton.setEnabled(true);
+                    urlTextField.setEnabled(true);
+                }
             });
 
             groupOptionsPanel.add(connectButton);

@@ -18,21 +18,41 @@ public class TilemanNetwork {
 
     @Getter
     private boolean connected = false;
+    @Getter
+    private String address = "";
 
-    public void connect(String addr, long hash)
+    public boolean connect(String addr, long hash)
     {
         try {
             sock = new Socket(addr, PORT);
-            OutputStream out = sock.getOutputStream();
+            sock.setSoTimeout(2000);
+            DataOutputStream out = new DataOutputStream(sock.getOutputStream());
             byte[] hsPacket = objectToBytes(new HandshakePacket(hash));
             out.write(hsPacket);
             out.flush();
+
+            address = addr;
+            connected = true;
+            return true;
         }
         catch(UnknownHostException e) {
             System.err.println("Unable to find host on " + addr);
         }
         catch (IOException e) {
             System.err.println("IO Exception connecting to host on " + addr);
+        }
+
+        return false;
+    }
+
+    public void disconnect()
+    {
+        try {
+            sock.close();
+            connected = false;
+            address = "";
+        } catch (IOException e) {
+            System.err.println("IO Exception disconnecting from " + address);
         }
     }
 
