@@ -33,8 +33,24 @@ import lombok.Value;
 @Value
 class TilemanModeTile
 {
+	//Flags
+	public static final int TILE_REMOTE = 0b1;
+
 	private int regionId;
 	private int regionX;
 	private int regionY;
 	private int z;
+
+	private int flags;
+
+
+	@Override
+	public boolean equals(Object o)
+	{
+		TilemanModeTile t = (TilemanModeTile) o;
+		return regionId == t.regionId &&
+				regionX == t.regionX &&
+				regionY == t.regionY &&
+				      z == t.z;
+	}
 }
