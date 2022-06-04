@@ -549,10 +549,7 @@ public class TilemanModePlugin extends Plugin {
         updateTileMark(localPoint, true, 0);
     }
 
-    //TODO make this function thread safe
-    //TODO send updates to the server. Make sure only tiles marked locally get sent, otherwise the server and client
-    //      could get stuck in a loop
-    private void updateTileMark(LocalPoint localPoint, boolean markedValue, int tileFlags) {
+    private synchronized void updateTileMark(LocalPoint localPoint, boolean markedValue, int tileFlags) {
         if(containsAnyOf(getTileMovementFlags(localPoint), fullBlock)) {
             return;
         }
@@ -575,15 +572,27 @@ public class TilemanModePlugin extends Plugin {
             // Try add tile
             if (!tilemanModeTiles.contains(tile) && (profileManager.isAllowTileDeficit() || remainingTiles > 0)) {
                 tilemanModeTiles.add(tile);
-                networkManager.sendTileUnlock(tile);
                 visiblePoints.add(worldPoint);
-                totalTilesUsed++;
+
+                if((tileFlags&TilemanModeTile.TILE_REMOTE) != TilemanModeTile.TILE_REMOTE) {
+                    networkManager.sendTileUnlock(tile);
+                    totalTilesUsed++;
+                }
             }
         } else {
             // Try remove tile
-            tilemanModeTiles.remove(tile);
+            int index = tilemanModeTiles.indexOf(tile);
+
+            if(index >= 0)
+            {
+                TilemanModeTile tileToRemove = tilemanModeTiles.get(index);
+                if((tileToRemove.getFlags()&TilemanModeTile.TILE_REMOTE) != TilemanModeTile.TILE_REMOTE) {
+                    totalTilesUsed--;
+                }
+            }
+
+            tilemanModeTiles.remove(index);
             visiblePoints.remove(worldPoint);
-            totalTilesUsed--;
         }
 
         profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
