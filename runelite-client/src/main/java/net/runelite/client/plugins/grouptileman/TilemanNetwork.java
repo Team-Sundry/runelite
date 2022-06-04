@@ -108,7 +108,8 @@ public class TilemanNetwork {
     public void disconnect()
     {
         try {
-            //TODO send disconnect packet
+            out.write(new DisconnectPacket().payload());
+            out.flush();
             sock.close();
             connected = false;
             address = "";
