@@ -42,17 +42,20 @@ public class TilemanNetwork {
             address = addr;
             connected = true;
 
+            //TODO Should probably make a proper function or even a class instead of using an anonymous one
             streamConsumer = new Thread(() -> {
                 while(connected)
                 {
                     try {
                         byte command = in.readByte();
 
+                        //TODO Handle incoming packets. Use in.readFully() to read the right number of bytes
                         switch (command)
                         {
                             case 0:
                                 break;
                             case 2:
+                                //TODO Update tiles. Call updateTileMark() in TilemanModePlugin.java with the remote flag
                                 break;
                             case 3:
                                 disconnect();
@@ -84,6 +87,7 @@ public class TilemanNetwork {
     public void disconnect()
     {
         try {
+            //TODO send disconnect packet
             sock.close();
             connected = false;
             address = "";

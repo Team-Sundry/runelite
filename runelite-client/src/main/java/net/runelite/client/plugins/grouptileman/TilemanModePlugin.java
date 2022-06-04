@@ -549,6 +549,9 @@ public class TilemanModePlugin extends Plugin {
         updateTileMark(localPoint, true, 0);
     }
 
+    //TODO make this function thread safe
+    //TODO send updates to the server. Make sure only tiles marked locally get sent, otherwise the server and client
+    //      could get stuck in a loop
     private void updateTileMark(LocalPoint localPoint, boolean markedValue, int tileFlags) {
         if(containsAnyOf(getTileMovementFlags(localPoint), fullBlock)) {
             return;
