@@ -315,6 +315,7 @@ public class TilemanPluginPanel extends PluginPanel {
             urlPanel.add(urlLabel);
             addSpacer(urlPanel);
             JTextField urlTextField = new JTextField(20);
+            urlTextField.setBackground(new Color(0x222222));
             urlPanel.add(urlTextField);
             groupOptionsPanel.add(urlPanel);
 
@@ -337,10 +338,12 @@ public class TilemanPluginPanel extends PluginPanel {
                     if (networkManager.connect(urlTextField.getText(), client.getAccountHash())) {
                         connectButton.setText("Disconnect");
                         connectButton.setEnabled(true);
+                        urlTextField.setBackground(new Color(0x222222));
                     } else {
                         connectButton.setText("Connect");
                         connectButton.setEnabled(true);
                         urlTextField.setEnabled(true);
+                        urlTextField.setBackground(new Color(0x903000));
                     }
                 }
                 else {

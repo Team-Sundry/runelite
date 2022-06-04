@@ -572,6 +572,7 @@ public class TilemanModePlugin extends Plugin {
             // Try add tile
             if (!tilemanModeTiles.contains(tile) && (profileManager.isAllowTileDeficit() || remainingTiles > 0)) {
                 tilemanModeTiles.add(tile);
+                networkManager.sendTileUnlock(tile);
                 visiblePoints.add(worldPoint);
                 totalTilesUsed++;
             }
