@@ -47,6 +47,7 @@ import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -127,7 +128,7 @@ public class TilemanModePlugin extends Plugin {
     public Map<Integer, List<TilemanModeTile>> getTilesByRegion() {
         return profileManager.getTilesByRegion();
     }
-    private final Queue<TilemanModeTile> pendingTiles = new SynchronousQueue<>();
+    private final Queue<TilemanModeTile> pendingTiles = new ConcurrentLinkedQueue<>();
     private final Lock tileManagementLock = new ReentrantLock();
 
     public TilemanModePlugin()
@@ -587,15 +588,26 @@ public class TilemanModePlugin extends Plugin {
 
             if (markedValue) {
                 // Try add tile
-                if (!tilemanModeTiles.contains(tile) && (profileManager.isAllowTileDeficit() || remainingTiles > 0)) {
-
-                    if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE || !networkManager.isConnected()) {
-                        tilemanModeTiles.add(tile);
-                        visiblePoints.add(worldPoint);
-                    } else {
-                        pendingTiles.add(tile);
-                        networkManager.sendTileUnlock(tile);
-                        totalTilesUsed++;
+                if (!tilemanModeTiles.contains(tile)) {
+                    if(profileManager.getGameMode() == TilemanGameMode.GROUP) {
+                        if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE) {
+                            tilemanModeTiles.add(tile);
+                            visiblePoints.add(worldPoint);
+                        } else if(networkManager.isConnected()){
+                            if (profileManager.isAllowTileDeficit() || remainingTiles > 0) {
+                                pendingTiles.add(tile);
+                                networkManager.sendTileUnlock(tile);
+                                totalTilesUsed++;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (profileManager.isAllowTileDeficit() || remainingTiles > 0) {
+                            tilemanModeTiles.add(tile);
+                            visiblePoints.add(worldPoint);
+                            totalTilesUsed++;
+                        }
                     }
                 }
             } else {
@@ -632,6 +644,10 @@ public class TilemanModePlugin extends Plugin {
 
                 tilemanModeTiles.add(tile);
                 visiblePoints.add(worldPoint);
+            }
+            else
+            {
+                totalTilesUsed--;
             }
         }
         tileManagementLock.unlock();

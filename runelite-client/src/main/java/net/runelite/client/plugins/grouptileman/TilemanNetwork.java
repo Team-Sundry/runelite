@@ -7,6 +7,7 @@ import net.runelite.api.coords.WorldPoint;
 
 import java.net.Socket;
 import java.io.*;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
@@ -44,8 +45,10 @@ public class TilemanNetwork {
             out.write(hsPacket);
             out.flush();
 
-            // TODO: Handle connection confirmation
-
+            byte[] hsResponse = new byte[2];
+            in.readFully(hsResponse);
+            if(hsResponse[0] != 0 || hsResponse[1] != 0)
+                return false;
 
             address = addr;
             connected = true;
@@ -77,8 +80,10 @@ public class TilemanNetwork {
                                 disconnect();
                                 break;
                         }
-                    } catch (IOException e) {
+                    }catch (SocketTimeoutException ignored) {}
+                    catch (IOException e) {
                         System.err.println("Error reading command type from " + addr);
+                        System.err.println(e.toString());
                     }
                 }
                 System.out.println("Shut down");
