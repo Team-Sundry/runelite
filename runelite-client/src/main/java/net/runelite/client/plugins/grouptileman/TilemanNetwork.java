@@ -42,31 +42,28 @@ public class TilemanNetwork {
             address = addr;
             connected = true;
 
-            streamConsumer = new Thread()
-            {
-                public void run()
+            streamConsumer = new Thread(() -> {
+                while(connected)
                 {
-                    while(connected)
-                    {
-                        try {
-                            byte command = in.readByte();
-                            switch (command)
-                            {
-                                case 0:
-                                    break;
-                                case 2:
-                                    break;
-                                case 3:
-                                    disconnect();
-                                    break;
-                            }
-                        } catch (IOException e) {
-                            System.err.println("Error reading command type from " + addr);
+                    try {
+                        byte command = in.readByte();
+
+                        switch (command)
+                        {
+                            case 0:
+                                break;
+                            case 2:
+                                break;
+                            case 3:
+                                disconnect();
+                                break;
                         }
+                    } catch (IOException e) {
+                        System.err.println("Error reading command type from " + addr);
                     }
-                    System.out.println("Shut down");
                 }
-            };
+                System.out.println("Shut down");
+            });
 
             streamConsumer.start();
 
@@ -110,7 +107,7 @@ public class TilemanNetwork {
         }
     }
 
-    private static class ResponsePacket implements Serializable
+    private static class ResponsePacket
     {
         public byte command;
         public byte status;
@@ -127,7 +124,7 @@ public class TilemanNetwork {
         }
     }
 
-    private static class HandshakePacket implements Serializable
+    private static class HandshakePacket
     {
         public byte command;
         public byte version;
@@ -145,7 +142,7 @@ public class TilemanNetwork {
         }
     }
 
-    private static class PlaceTilePacket implements Serializable
+    private static class PlaceTilePacket
     {
         public byte command;
         public int regionId;
