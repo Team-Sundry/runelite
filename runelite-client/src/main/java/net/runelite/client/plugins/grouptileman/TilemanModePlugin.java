@@ -74,7 +74,7 @@ public class TilemanModePlugin extends Plugin {
     @Inject private TileInfoOverlay infoOverlay;
     @Inject private ClientToolbar clientToolbar;
 
-    @Inject private TilemanNetwork networkManager;
+    private final TilemanNetwork networkManager;
 
     @Provides
     TilemanModeConfig provideConfig(ConfigManager configManager) {
@@ -127,8 +127,13 @@ public class TilemanModePlugin extends Plugin {
     public Map<Integer, List<TilemanModeTile>> getTilesByRegion() {
         return profileManager.getTilesByRegion();
     }
-    private Queue<TilemanModeTile> pendingTiles = new SynchronousQueue<>();
-    private Lock tileManagementLock = new ReentrantLock();
+    private final Queue<TilemanModeTile> pendingTiles = new SynchronousQueue<>();
+    private final Lock tileManagementLock = new ReentrantLock();
+
+    public TilemanModePlugin()
+    {
+        this.networkManager = new TilemanNetwork(this);
+    }
 
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event) {
@@ -565,7 +570,7 @@ public class TilemanModePlugin extends Plugin {
 
     }
 
-    private void updateTileMark(WorldPoint worldPoint, boolean markedValue, int tileFlags) {
+    public void updateTileMark(WorldPoint worldPoint, boolean markedValue, int tileFlags) {
         int regionId = worldPoint.getRegionID();
         TilemanModeTile tile = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), tileFlags);
         log.debug("Updating point: {} - {}", tile, worldPoint);

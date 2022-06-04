@@ -3,6 +3,7 @@ package net.runelite.client.plugins.grouptileman;
 import com.google.common.primitives.Longs;
 import lombok.Getter;
 import lombok.Value;
+import net.runelite.api.coords.WorldPoint;
 
 import java.net.Socket;
 import java.io.*;
@@ -24,6 +25,13 @@ public class TilemanNetwork {
     private boolean connected = false;
     @Getter
     private String address = "";
+
+    private TilemanModePlugin plugin;
+
+    public TilemanNetwork(TilemanModePlugin plugin)
+    {
+        this.plugin = plugin;
+    }
 
     public boolean connect(String addr, long hash)
     {
@@ -49,13 +57,21 @@ public class TilemanNetwork {
                     try {
                         byte command = in.readByte();
 
-                        //TODO Handle incoming packets. Use in.readFully() to read the right number of bytes
                         switch (command)
                         {
                             case 0:
+                                byte response = in.readByte();
+                                plugin.handleNetworkResponse(response == 0);
                                 break;
                             case 2:
-                                //TODO Update tiles. Call updateTileMark() in TilemanModePlugin.java with the remote flag
+                                int regionId = in.readInt();
+                                int regionX = in.readInt();
+                                int regionY = in.readInt();
+                                int z = in.readInt();
+
+                                WorldPoint point = WorldPoint.fromRegion(regionId, regionX, regionY, z);
+                                plugin.updateTileMark(point, true, TilemanModeTile.TILE_REMOTE);
+
                                 break;
                             case 3:
                                 disconnect();
