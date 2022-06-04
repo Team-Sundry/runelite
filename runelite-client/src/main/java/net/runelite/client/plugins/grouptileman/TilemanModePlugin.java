@@ -589,13 +589,13 @@ public class TilemanModePlugin extends Plugin {
                 // Try add tile
                 if (!tilemanModeTiles.contains(tile) && (profileManager.isAllowTileDeficit() || remainingTiles > 0)) {
 
-                    if ((tileFlags & TilemanModeTile.TILE_REMOTE) != TilemanModeTile.TILE_REMOTE) {
+                    if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE || !networkManager.isConnected()) {
+                        tilemanModeTiles.add(tile);
+                        visiblePoints.add(worldPoint);
+                    } else {
                         pendingTiles.add(tile);
                         networkManager.sendTileUnlock(tile);
                         totalTilesUsed++;
-                    } else {
-                        tilemanModeTiles.add(tile);
-                        visiblePoints.add(worldPoint);
                     }
                 }
             } else {
