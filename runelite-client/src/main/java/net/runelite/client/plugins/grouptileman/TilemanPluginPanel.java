@@ -335,6 +335,8 @@ public class TilemanPluginPanel extends PluginPanel {
                     connectButton.setEnabled(false);
                     urlTextField.setEnabled(false);
 
+                    plugin.clearTiles();
+
                     if (networkManager.connect(urlTextField.getText(), client.getAccountHash())) {
                         connectButton.setText("Disconnect");
                         connectButton.setEnabled(true);

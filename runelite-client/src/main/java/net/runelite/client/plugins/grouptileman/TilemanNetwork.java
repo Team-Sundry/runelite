@@ -7,6 +7,7 @@ import net.runelite.api.coords.WorldPoint;
 
 import java.net.Socket;
 import java.io.*;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
@@ -17,7 +18,9 @@ public class TilemanNetwork {
     public static final byte RESPONSE_PACKET = 0;
     public static final byte HANDSHAKE_PACKET = 1;
     public static final byte PLACE_TILE_PACKET = 2;
-    public static final byte DISCONNECT_PACKET = 3;
+    public static final byte UPDATE_TILE_PACKET = 3;
+    public static final byte DISCONNECT_PACKET = 4;
+
     private Socket sock;
     private DataOutputStream out;
     private DataInputStream in;
@@ -26,15 +29,17 @@ public class TilemanNetwork {
     private boolean connected = false;
     @Getter
     private String address = "";
+    @Getter
+    private byte lastError = 0;
 
-    private TilemanModePlugin plugin;
+    private final TilemanModePlugin plugin;
 
     public TilemanNetwork(TilemanModePlugin plugin)
     {
         this.plugin = plugin;
     }
 
-    public boolean connect(String addr, long hash)
+    public boolean connect(String addr, final long hash)
     {
         try {
             sock = new Socket(addr, PORT);
@@ -47,11 +52,16 @@ public class TilemanNetwork {
 
             byte[] hsResponse = new byte[2];
             in.readFully(hsResponse);
-            if(hsResponse[0] != 0 || hsResponse[1] != 0)
+            if(hsResponse[0] != 0 || hsResponse[1] != 0) {
+                System.err.println("Handshake failed");
+                lastError = hsResponse[0];
                 return false;
+            }
 
+            sock.setSoTimeout(0);
             address = addr;
             connected = true;
+            lastError = 0;
 
             //TODO Should probably make a proper function or even a class instead of using an anonymous one
             streamConsumer = new Thread(() -> {
@@ -62,28 +72,43 @@ public class TilemanNetwork {
 
                         switch (command)
                         {
-                            case 0:
+                            case RESPONSE_PACKET:
                                 byte response = in.readByte();
-                                plugin.handleNetworkResponse(response == 0);
+                                if(response != 0) {
+                                    System.err.println("The server has indicated an error with code " + (int) response);
+                                    lastError = response;
+                                }
                                 break;
-                            case 2:
+                            case UPDATE_TILE_PACKET:
                                 int regionId = in.readInt();
                                 int regionX = in.readInt();
                                 int regionY = in.readInt();
                                 int z = in.readInt();
+                                long playerId = in.readLong();
+
+                                int flags = TilemanModeTile.TILE_REMOTE;
+                                if(playerId != hash)
+                                    flags |= TilemanModeTile.TILE_FROM_OTHER;
 
                                 WorldPoint point = WorldPoint.fromRegion(regionId, regionX, regionY, z);
-                                plugin.updateTileMark(point, true, TilemanModeTile.TILE_REMOTE);
+                                plugin.updateTileMark(point, true, flags);
 
                                 break;
-                            case 3:
+                            case DISCONNECT_PACKET:
                                 disconnect();
                                 break;
                         }
                     }catch (SocketTimeoutException ignored) {}
                     catch (IOException e) {
-                        System.err.println("Error reading command type from " + addr);
-                        System.err.println(e.toString());
+                        System.err.println("Error reading command from " + addr);
+                        System.err.println(e);
+                        if(!sock.isClosed())
+                        {
+                            plugin.getPanel().rebuild();
+                            connected = false;
+                            address = "";
+                            lastError  = -3;
+                        }
                     }
                 }
                 System.out.println("Shut down");
@@ -96,10 +121,12 @@ public class TilemanNetwork {
         catch(UnknownHostException e) {
             System.err.println("Unable to find host on " + addr);
             System.err.println(e.getMessage());
+            lastError = -2;
         }
         catch (IOException e) {
-            System.err.println("IO Exception connecting to host on " + addr);
+            System.err.println("IO Exception on " + addr);
             System.err.println(e.getMessage());
+            lastError = -1;
         }
 
         return false;
@@ -113,8 +140,13 @@ public class TilemanNetwork {
             sock.close();
             connected = false;
             address = "";
+            streamConsumer.join();
         } catch (IOException e) {
             System.err.println("IO Exception disconnecting from " + address);
+            System.err.println(e.getMessage());
+        } catch (InterruptedException e) {
+            System.err.println("Interrupt exception joining streamConsumer");
+            System.err.println(e.getMessage());
         }
     }
 
@@ -129,7 +161,23 @@ public class TilemanNetwork {
                 out.flush();
             } catch (IOException e) {
                 System.err.println("IO Exception sending tile update to " + address);
+                lastError = -4;
             }
+        }
+    }
+
+    public String GetLastErrorString()
+    {
+        switch (lastError)
+        {
+            case -4: return "SEND";
+            case -3: return "CLOSED";
+            case -2: return "NOH";
+            case -1: return "REJ";
+            case 0: return "OK";
+            case 1: return "ERR";
+            case 2: return "BAD VER";
+            default: return "UNKNOWN";
         }
     }
 

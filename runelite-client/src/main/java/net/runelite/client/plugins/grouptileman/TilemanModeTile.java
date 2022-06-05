@@ -35,6 +35,7 @@ class TilemanModeTile
 {
 	//Flags
 	public static final int TILE_REMOTE = 0b1;
+	public static final int TILE_FROM_OTHER = 0b10;
 
 	private int regionId;
 	private int regionX;

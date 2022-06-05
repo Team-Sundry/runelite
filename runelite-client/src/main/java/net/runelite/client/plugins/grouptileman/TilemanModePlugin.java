@@ -65,7 +65,7 @@ public class TilemanModePlugin extends Plugin {
     private static final String UNMARK = "Clear Tileman tile";
     private static final String WALK_HERE = "Walk here";
 
-    @Inject private Client client;
+    @Getter @Inject private Client client;
     @Inject private TilemanModeConfig config;
     @Inject private ConfigManager configManager;
     @Inject private OverlayManager overlayManager;
@@ -75,6 +75,7 @@ public class TilemanModePlugin extends Plugin {
     @Inject private TileInfoOverlay infoOverlay;
     @Inject private ClientToolbar clientToolbar;
 
+    @Getter
     private final TilemanNetwork networkManager;
 
     @Provides
@@ -118,6 +119,7 @@ public class TilemanModePlugin extends Plugin {
 
     @Getter
     private List<WorldPoint> visiblePoints = new ArrayList<>();
+    private List<TilemanModeTile> pendingTiles = new ArrayList<>();
 
     public List<Consumer<GameState>> onLoginStateChangedEvent = new ArrayList<>();
 
@@ -128,8 +130,9 @@ public class TilemanModePlugin extends Plugin {
     public Map<Integer, List<TilemanModeTile>> getTilesByRegion() {
         return profileManager.getTilesByRegion();
     }
-    private final Queue<TilemanModeTile> pendingTiles = new ConcurrentLinkedQueue<>();
     private final Lock tileManagementLock = new ReentrantLock();
+    @Getter
+    private TilemanPluginPanel panel;
 
     public TilemanModePlugin()
     {
@@ -250,7 +253,7 @@ public class TilemanModePlugin extends Plugin {
         initializeTotalTilesUsed();
         updateTileInfoDisplay();
         log.debug("startup");
-        TilemanPluginPanel panel = new TilemanPluginPanel(this, client, profileManager, networkManager);
+        panel = new TilemanPluginPanel(this, client, profileManager, networkManager);
         NavigationButton navButton = NavigationButton.builder()
                 .tooltip("Tileman Import")
                 .icon(ImageUtil.getResourceStreamFromClass(getClass(), "/icon.png"))
@@ -593,11 +596,10 @@ public class TilemanModePlugin extends Plugin {
                         if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE) {
                             tilemanModeTiles.add(tile);
                             visiblePoints.add(worldPoint);
+                            totalTilesUsed++;
                         } else if(networkManager.isConnected()){
                             if (profileManager.isAllowTileDeficit() || remainingTiles > 0) {
-                                pendingTiles.add(tile);
                                 networkManager.sendTileUnlock(tile);
-                                totalTilesUsed++;
                             }
                         }
                     }
@@ -625,30 +627,20 @@ public class TilemanModePlugin extends Plugin {
                 visiblePoints.remove(worldPoint);
             }
 
-            profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
+            if(profileManager.getGameMode() != TilemanGameMode.GROUP)
+                profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
         }
         tileManagementLock.unlock();
     }
 
-    public void handleNetworkResponse(boolean success)
+    public void clearTiles()
     {
         tileManagementLock.lock();
         {
-            TilemanModeTile tile = pendingTiles.remove();
-            if (success) {
-                Map<Integer, List<TilemanModeTile>> tilesByRegion = getTilesByRegion();
-
-                List<TilemanModeTile> tilemanModeTiles = tilesByRegion.get(tile.getRegionId());
-
-                WorldPoint worldPoint = WorldPoint.fromRegion(tile.getRegionId(), tile.getRegionX(), tile.getRegionY(), tile.getZ());
-
-                tilemanModeTiles.add(tile);
-                visiblePoints.add(worldPoint);
-            }
-            else
-            {
-                totalTilesUsed--;
-            }
+            getTilesByRegion().clear();
+            visiblePoints.clear();
+            totalTilesUsed = 0;
+            updateTileInfoDisplay();
         }
         tileManagementLock.unlock();
     }

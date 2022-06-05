@@ -93,6 +93,15 @@ class TileInfoOverlay extends OverlayPanel {
                 .right(unlockedTiles)
                 .build());
 
+        if(profileManager.getGameMode() == TilemanGameMode.GROUP) {
+            panelComponent.getChildren().add(LineComponent.builder()
+                    .left(plugin.getNetworkManager().isConnected()? "Connected" : "Disconnected")
+                    .leftColor(plugin.getNetworkManager().isConnected()? Color.GREEN : Color.RED)
+                    .right(plugin.getNetworkManager().GetLastErrorString())
+                    .rightColor(plugin.getNetworkManager().getLastError() == 0?Color.GREEN:Color.RED)
+                    .build());
+        }
+
         panelComponent.setPreferredSize(new Dimension(
                 getLongestStringWidth(STRINGS, graphics)
                         + getLongestStringWidth(new String[] {unlockedTiles, unspentTiles}, graphics),
