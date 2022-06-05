@@ -596,7 +596,8 @@ public class TilemanModePlugin extends Plugin {
                         if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE) {
                             tilemanModeTiles.add(tile);
                             visiblePoints.add(worldPoint);
-                            totalTilesUsed++;
+                            if((tileFlags & TilemanModeTile.TILE_FROM_OTHER) == 0)
+                                totalTilesUsed++;
                         } else if(networkManager.isConnected()){
                             if (profileManager.isAllowTileDeficit() || remainingTiles > 0) {
                                 networkManager.sendTileUnlock(tile);
