@@ -369,7 +369,7 @@ public class TilemanModePlugin extends Plugin {
 
         // If including total level, add those tiles in
         if (profileManager.isTilesFromTotalLevel()) {
-            earnedTiles += client.getTotalLevel();
+            earnedTiles += client.getTotalLevel()-32;
         }
 
         remainingTiles = earnedTiles - placedTiles;
