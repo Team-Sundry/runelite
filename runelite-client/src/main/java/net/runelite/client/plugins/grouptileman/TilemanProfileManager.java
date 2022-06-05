@@ -194,6 +194,12 @@ public class TilemanProfileManager {
         saveGameRules(activeProfile, gameRules);
     }
 
+    public String getGroupServerURL() {return gameRules.getGroupServerURL();}
+    public void setGroupServerURL(String url){
+        gameRules.setGroupServerURL(url);
+        saveGameRules(activeProfile, gameRules);
+    }
+
     public boolean isEnableCustomGameMode() { return gameRules.isEnableCustomGameMode(); }
     public void setEnableCustomGameMode(boolean state) {
         gameRules.setEnableCustomGameMode(state);

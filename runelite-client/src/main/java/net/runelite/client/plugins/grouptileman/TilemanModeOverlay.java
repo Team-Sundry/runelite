@@ -63,6 +63,7 @@ public class TilemanModeOverlay extends Overlay
 		Color color = getTileColor();
 		List<WorldPoint> visibleTilePoints = plugin.getVisiblePoints();
 
+		plugin.tileManagementLock.lock();
 		for (WorldPoint point : visibleTilePoints)
 		{
 			if (point.getPlane() != client.getPlane())
@@ -71,7 +72,7 @@ public class TilemanModeOverlay extends Overlay
 			}
 			drawTile(graphics, point, color);
 		}
-
+		plugin.tileManagementLock.unlock();
 		return null;
 	}
 

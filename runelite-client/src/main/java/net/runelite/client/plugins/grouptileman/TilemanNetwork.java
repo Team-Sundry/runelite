@@ -5,11 +5,8 @@ import lombok.Getter;
 import lombok.Value;
 import net.runelite.api.coords.WorldPoint;
 
-import java.net.Socket;
+import java.net.*;
 import java.io.*;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class TilemanNetwork {
@@ -42,8 +39,9 @@ public class TilemanNetwork {
     public boolean connect(String addr, final long hash)
     {
         try {
-            sock = new Socket(addr, PORT);
+            sock = new Socket();
             sock.setSoTimeout(2000);
+            sock.connect(new InetSocketAddress(addr, PORT), 2000);
             out = new DataOutputStream(sock.getOutputStream());
             in = new DataInputStream(sock.getInputStream());
             byte[] hsPacket = (new HandshakePacket(hash)).payload();

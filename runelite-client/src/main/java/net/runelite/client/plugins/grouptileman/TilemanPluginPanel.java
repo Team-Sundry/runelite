@@ -316,6 +316,7 @@ public class TilemanPluginPanel extends PluginPanel {
             addSpacer(urlPanel);
             JTextField urlTextField = new JTextField(20);
             urlTextField.setBackground(new Color(0x222222));
+            urlTextField.setText(profileManager.getGroupServerURL());
             urlPanel.add(urlTextField);
             groupOptionsPanel.add(urlPanel);
 
@@ -334,7 +335,7 @@ public class TilemanPluginPanel extends PluginPanel {
                     connectButton.setText("Working...");
                     connectButton.setEnabled(false);
                     urlTextField.setEnabled(false);
-
+                    profileManager.setGroupServerURL(urlTextField.getText());
                     plugin.clearTiles();
 
                     if (networkManager.connect(urlTextField.getText(), client.getAccountHash())) {

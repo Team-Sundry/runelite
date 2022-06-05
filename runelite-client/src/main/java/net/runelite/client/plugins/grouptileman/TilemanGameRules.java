@@ -67,7 +67,6 @@ public class TilemanGameRules implements Serializable {
     private boolean getTilesFromTotalLevelByGameMode() {
         switch (gameMode) {
             case ACCELERATED:
-            case GROUP:
                 return true;
             default:
                 return false;

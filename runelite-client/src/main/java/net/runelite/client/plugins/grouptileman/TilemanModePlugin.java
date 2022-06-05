@@ -130,7 +130,7 @@ public class TilemanModePlugin extends Plugin {
     public Map<Integer, List<TilemanModeTile>> getTilesByRegion() {
         return profileManager.getTilesByRegion();
     }
-    private final Lock tileManagementLock = new ReentrantLock();
+    public final Lock tileManagementLock = new ReentrantLock();
     @Getter
     private TilemanPluginPanel panel;
 
