@@ -191,10 +191,6 @@ public class TilemanModePlugin extends Plugin {
             return;
         }
 
-        initializeTotalTilesUsed();
-
-        updateVisiblePoints();
-        updateTileInfoDisplay();
         inHouse = false;
     }
 
@@ -203,6 +199,12 @@ public class TilemanModePlugin extends Plugin {
             isLoggedIn = true;
             lastSeenGameState = GameState.LOGGED_IN;
             onLoginStateChangedEvent.forEach(func -> func.accept(lastSeenGameState));
+
+            initializeTotalTilesUsed();
+
+            updateVisiblePoints();
+            updateTileInfoDisplay();
+
         } else if (gameState == GameState.LOGIN_SCREEN && lastSeenGameState != GameState.LOGIN_SCREEN) {
             isLoggedIn = false;
             lastSeenGameState = GameState.LOGIN_SCREEN;
@@ -630,8 +632,7 @@ public class TilemanModePlugin extends Plugin {
 
             updateTileInfoDisplay();
 
-            if(profileManager.getGameMode() != TilemanGameMode.GROUP)
-                profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
+            profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
         }
         tileManagementLock.unlock();
     }

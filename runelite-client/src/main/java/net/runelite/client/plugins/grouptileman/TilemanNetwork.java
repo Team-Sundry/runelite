@@ -69,7 +69,7 @@ public class TilemanNetwork {
                 {
                     try {
                         byte command = in.readByte();
-                        System.out.println("Got command type " + command);
+                        //System.out.println("Got command type " + command);
                         switch (command)
                         {
                             case RESPONSE_PACKET:
@@ -86,7 +86,7 @@ public class TilemanNetwork {
                                 int regionY = in.readInt();
                                 int z = in.readInt();
 
-                                System.out.println("" + isMe + " " + regionId + " " + regionX + " " + regionY + " " + z);
+                                //System.out.println("" + isMe + " " + regionId + " " + regionX + " " + regionY + " " + z);
 
                                 int flags = TilemanModeTile.TILE_REMOTE;
                                 if(isMe != 0)
