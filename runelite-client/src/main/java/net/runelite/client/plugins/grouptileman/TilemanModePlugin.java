@@ -627,6 +627,8 @@ public class TilemanModePlugin extends Plugin {
                 visiblePoints.remove(worldPoint);
             }
 
+            updateTileInfoDisplay();
+
             if(profileManager.getGameMode() != TilemanGameMode.GROUP)
                 profileManager.saveTiles(profileManager.getActiveProfile(), regionId, tilemanModeTiles);
         }

@@ -69,7 +69,7 @@ public class TilemanNetwork {
                 {
                     try {
                         byte command = in.readByte();
-
+                        System.out.println("Got command type " + command);
                         switch (command)
                         {
                             case RESPONSE_PACKET:
@@ -80,14 +80,16 @@ public class TilemanNetwork {
                                 }
                                 break;
                             case UPDATE_TILE_PACKET:
+                                byte isMe = in.readByte();
                                 int regionId = in.readInt();
                                 int regionX = in.readInt();
                                 int regionY = in.readInt();
                                 int z = in.readInt();
-                                long playerId = in.readLong();
+
+                                System.out.println("" + isMe + " " + regionId + " " + regionX + " " + regionY + " " + z);
 
                                 int flags = TilemanModeTile.TILE_REMOTE;
-                                if(playerId != hash)
+                                if(isMe != 0)
                                     flags |= TilemanModeTile.TILE_FROM_OTHER;
 
                                 WorldPoint point = WorldPoint.fromRegion(regionId, regionX, regionY, z);
