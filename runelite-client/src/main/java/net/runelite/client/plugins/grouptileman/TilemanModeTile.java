@@ -87,19 +87,19 @@ class TilemanModeTile
 
 	public static Color getColor(byte player)
 	{
-		int r = ((player << 7) & 0b10000000) +
-				((player << 4) & 0b01000000) +
-				(player       &  0b00100000);
-		int g = ((player << 6) & 0b10000000) +
+		++player;
+		int r =  (player << 7) & 0b10000000+
 				((player << 3) & 0b01000000) +
-				((player >> 1) & 0b00100000);
-		int b = ((player << 2) & 0b10000000) +
-				(                0b01000000) +
 				((player >> 2) & 0b00100000);
+		int g = ((player << 6) & 0b10000000) +
+				((player << 2) & 0b01000000) +
+				((player >> 1) & 0b00100000);
+		int b = ((player << 5) & 0b10000000) +
+				((player << 1) & 0b01000000);
 
-		r |= 0b00011111;
-		g |= 0b00011111;
-		b |= 0b00011111;
+		r = 0b11110000 - r;
+		g = 0b11110000 - g;
+		b = 0b11110000 - b;
 
 		return new Color(r, g, b);
 	}
