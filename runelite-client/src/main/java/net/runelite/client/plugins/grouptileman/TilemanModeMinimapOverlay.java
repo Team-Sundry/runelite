@@ -65,17 +65,19 @@ class TilemanModeMinimapOverlay extends Overlay
 			return null;
 		}
 
-		Color color = getTileColor();
-		List<WorldPoint> visibleTilePoints = plugin.getVisiblePoints();
+		List<TilemanModeTile> visibleTilePoints = plugin.getVisiblePoints();
 
-		for (final WorldPoint point : visibleTilePoints)
+		plugin.tileManagementLock.lock();
+		for (final TilemanModeTile tile : visibleTilePoints)
 		{
+			WorldPoint point = tile.getPoint();
 			if (point.getPlane() != client.getPlane())
 			{
 				continue;
 			}
-			drawOnMinimap(graphics, point, color);
+			drawOnMinimap(graphics, point, getTileColor(tile.getPlayer()));
 		}
+		plugin.tileManagementLock.unlock();
 
 		return null;
 	}
@@ -104,7 +106,7 @@ class TilemanModeMinimapOverlay extends Overlay
 		OverlayUtil.renderMinimapRect(client, graphics, posOnMinimap, TILE_WIDTH, TILE_HEIGHT, color);
 	}
 
-	private Color getTileColor() {
+	private Color getTileColor(byte player) {
 		if(config.enableTileWarnings()) {
 			if (plugin.getRemainingTiles() <= 0) {
 				return Color.RED;
@@ -112,6 +114,7 @@ class TilemanModeMinimapOverlay extends Overlay
 				return new Color(255, 153, 0);
 			}
 		}
-		return config.markerColor();
+
+		return TilemanModeTile.getColor(player);
 	}
 }

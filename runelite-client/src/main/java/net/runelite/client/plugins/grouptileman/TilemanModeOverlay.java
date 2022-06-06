@@ -60,17 +60,17 @@ public class TilemanModeOverlay extends Overlay
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		Color color = getTileColor();
-		List<WorldPoint> visibleTilePoints = plugin.getVisiblePoints();
+		List<TilemanModeTile> visibleTilePoints = plugin.getVisiblePoints();
 
 		plugin.tileManagementLock.lock();
-		for (WorldPoint point : visibleTilePoints)
+		for (TilemanModeTile tile : visibleTilePoints)
 		{
+			WorldPoint point = tile.getPoint();
 			if (point.getPlane() != client.getPlane())
 			{
 				continue;
 			}
-			drawTile(graphics, point, color);
+			drawTile(graphics, point, getTileColor(tile.getPlayer()));
 		}
 		plugin.tileManagementLock.unlock();
 		return null;
@@ -100,7 +100,7 @@ public class TilemanModeOverlay extends Overlay
 		OverlayUtil.renderPolygon(graphics, poly, color);
 	}
 
-	private Color getTileColor() {
+	private Color getTileColor(byte player) {
 		if(config.enableTileWarnings()) {
 			if (plugin.getRemainingTiles() <= 0) {
 				return Color.RED;
@@ -108,6 +108,7 @@ public class TilemanModeOverlay extends Overlay
 				return new Color(255, 153, 0);
 			}
 		}
-		return config.markerColor();
+
+		return TilemanModeTile.getColor(player);
 	}
 }

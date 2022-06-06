@@ -118,7 +118,7 @@ public class TilemanModePlugin extends Plugin {
     private TilemanProfileManager profileManager;
 
     @Getter
-    private List<WorldPoint> visiblePoints = new ArrayList<>();
+    private List<TilemanModeTile> visiblePoints = new ArrayList<>();
     private List<TilemanModeTile> pendingTiles = new ArrayList<>();
 
     public List<Consumer<GameState>> onLoginStateChangedEvent = new ArrayList<>();
@@ -165,7 +165,7 @@ public class TilemanModePlugin extends Plugin {
 
             final WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, selectedSceneTile.getLocalLocation());
             final int regionId = worldPoint.getRegionID();
-            final TilemanModeTile point = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), 0);
+            final TilemanModeTile point = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), (byte)0, 0);
 
             if(!profileManager.getTilesByRegion().getOrDefault(regionId, new ArrayList()).contains(point)) {
                 client.createMenuEntry(-1)
@@ -209,6 +209,7 @@ public class TilemanModePlugin extends Plugin {
             isLoggedIn = false;
             lastSeenGameState = GameState.LOGIN_SCREEN;
             onLoginStateChangedEvent.forEach(func -> func.accept(lastSeenGameState));
+            networkManager.disconnect();
         }
     }
 
@@ -296,7 +297,8 @@ public class TilemanModePlugin extends Plugin {
             if (tiles == null) {
                 continue;
             }
-            translateTilesToWorldPoints(client, tiles, visiblePoints);
+
+            visiblePoints.addAll(tiles);
         }
     }
 
@@ -391,7 +393,7 @@ public class TilemanModePlugin extends Plugin {
         if (selectedPoint == null) {
             return;
         }
-        updateTileMark(selectedPoint, markedValue, 0);
+        updateTileMark(selectedPoint, markedValue, (byte)0, 0);
     }
 
     private void handleWalkedToTile(LocalPoint currentPlayerPoint) {
@@ -402,7 +404,7 @@ public class TilemanModePlugin extends Plugin {
         }
 
         // Mark the tile they walked to
-        updateTileMark(currentPlayerPoint, true, 0);
+        updateTileMark(currentPlayerPoint, true, (byte)0, 0);
 
         // If player moves 2 tiles in a straight line, fill in the middle tile
         // TODO Fill path between last point and current point. This will fix missing tiles that occur when you lag
@@ -562,23 +564,23 @@ public class TilemanModePlugin extends Plugin {
         if(lastPlane != client.getPlane()) {
             return;
         }
-        updateTileMark(localPoint, true, 0);
+        updateTileMark(localPoint, true, (byte) 0, 0);
     }
 
-    private void updateTileMark(LocalPoint localPoint, boolean markedValue, int tileFlags) {
+    private void updateTileMark(LocalPoint localPoint, boolean markedValue, byte player, int tileFlags) {
         if(containsAnyOf(getTileMovementFlags(localPoint), fullBlock)) {
             return;
         }
 
         WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, localPoint);
 
-        updateTileMark(worldPoint, markedValue, tileFlags);
+        updateTileMark(worldPoint, markedValue, player, tileFlags);
 
     }
 
-    public void updateTileMark(WorldPoint worldPoint, boolean markedValue, int tileFlags) {
+    public void updateTileMark(WorldPoint worldPoint, boolean markedValue, byte player, int tileFlags) {
         int regionId = worldPoint.getRegionID();
-        TilemanModeTile tile = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), tileFlags);
+        TilemanModeTile tile = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), player, tileFlags);
         log.debug("Updating point: {} - {}", tile, worldPoint);
 
         tileManagementLock.lock();
@@ -597,7 +599,7 @@ public class TilemanModePlugin extends Plugin {
                     if(profileManager.getGameMode() == TilemanGameMode.GROUP) {
                         if ((tileFlags & TilemanModeTile.TILE_REMOTE) == TilemanModeTile.TILE_REMOTE) {
                             tilemanModeTiles.add(tile);
-                            visiblePoints.add(worldPoint);
+                            visiblePoints.add(tile);
                             if((tileFlags & TilemanModeTile.TILE_FROM_OTHER) == 0)
                                 totalTilesUsed++;
                         } else if(networkManager.isConnected()){
@@ -610,7 +612,7 @@ public class TilemanModePlugin extends Plugin {
                     {
                         if (profileManager.isAllowTileDeficit() || remainingTiles > 0) {
                             tilemanModeTiles.add(tile);
-                            visiblePoints.add(worldPoint);
+                            visiblePoints.add(tile);
                             totalTilesUsed++;
                         }
                     }
@@ -627,7 +629,7 @@ public class TilemanModePlugin extends Plugin {
                 }
 
                 tilemanModeTiles.remove(index);
-                visiblePoints.remove(worldPoint);
+                visiblePoints.remove(tile);
             }
 
             updateTileInfoDisplay();

@@ -17,6 +17,7 @@ public class TilemanNetwork {
     public static final byte PLACE_TILE_PACKET = 2;
     public static final byte UPDATE_TILE_PACKET = 3;
     public static final byte DISCONNECT_PACKET = 4;
+    public static  final byte HANDSHAKE_RESPONSE_PACKET = 5;
 
     private Socket sock;
     private DataOutputStream out;
@@ -29,6 +30,8 @@ public class TilemanNetwork {
     @Getter
     private byte lastError = 0;
 
+    @Getter
+    private byte player;
     private final TilemanModePlugin plugin;
 
     public TilemanNetwork(TilemanModePlugin plugin)
@@ -48,13 +51,15 @@ public class TilemanNetwork {
             out.write(hsPacket);
             out.flush();
 
-            byte[] hsResponse = new byte[2];
+            byte[] hsResponse = new byte[3];
             in.readFully(hsResponse);
-            if(hsResponse[0] != 0 || hsResponse[1] != 0) {
+            if(hsResponse[0] != 5 || hsResponse[1] != 0) {
                 System.err.println("Handshake failed");
                 lastError = hsResponse[0];
                 return false;
             }
+
+            player = hsResponse[2];
 
             sock.setSoTimeout(0);
             address = addr;
@@ -78,7 +83,7 @@ public class TilemanNetwork {
                                 }
                                 break;
                             case UPDATE_TILE_PACKET:
-                                byte isMe = in.readByte();
+                                byte player = in.readByte();
                                 int regionId = in.readInt();
                                 int regionX = in.readInt();
                                 int regionY = in.readInt();
@@ -87,11 +92,12 @@ public class TilemanNetwork {
                                 //System.out.println("" + isMe + " " + regionId + " " + regionX + " " + regionY + " " + z);
 
                                 int flags = TilemanModeTile.TILE_REMOTE;
-                                if(isMe != 0)
+
+                                if(player != this.player)
                                     flags |= TilemanModeTile.TILE_FROM_OTHER;
 
                                 WorldPoint point = WorldPoint.fromRegion(regionId, regionX, regionY, z);
-                                plugin.updateTileMark(point, true, flags);
+                                plugin.updateTileMark(point, true, player, flags);
 
                                 break;
                             case DISCONNECT_PACKET:
