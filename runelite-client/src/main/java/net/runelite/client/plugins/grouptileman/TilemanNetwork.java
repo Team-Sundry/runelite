@@ -140,6 +140,8 @@ public class TilemanNetwork {
 
     public void disconnect()
     {
+        if(!connected) return;
+        
         try {
             out.write(new DisconnectPacket().payload());
             out.flush();
