@@ -580,7 +580,7 @@ public class TilemanModePlugin extends Plugin {
 
     public void updateTileMark(WorldPoint worldPoint, boolean markedValue, byte player, int tileFlags) {
         int regionId = worldPoint.getRegionID();
-        TilemanModeTile tile = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), client.getPlane(), player, tileFlags);
+        TilemanModeTile tile = new TilemanModeTile(regionId, worldPoint.getRegionX(), worldPoint.getRegionY(), worldPoint.getPlane(), player, tileFlags);
         log.debug("Updating point: {} - {}", tile, worldPoint);
 
         tileManagementLock.lock();
