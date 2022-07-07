@@ -29,11 +29,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import net.runelite.api.Client;
+import net.runelite.api.GraphicID;
+import net.runelite.api.GraphicsObject;
 import net.runelite.api.NPC;
 import net.runelite.api.Player;
 import net.runelite.api.Projectile;
 import net.runelite.api.Renderable;
-import net.runelite.api.Varbits;
 import net.runelite.client.callback.Hooks;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -58,6 +59,9 @@ public class EntityHiderPlugin extends Plugin
 
 	@Inject
 	private Hooks hooks;
+
+	@Inject
+	private NpcUtil npcUtil;
 
 	private boolean hideOthers;
 	private boolean hideOthers2D;
@@ -150,13 +154,6 @@ public class EntityHiderPlugin extends Plugin
 				return !(drawingUI ? hideLocalPlayer2D : hideLocalPlayer);
 			}
 
-			final boolean inPvp = client.getVarbitValue(Varbits.PVP_SPEC_ORB) == 1;
-			if (inPvp)
-			{
-				// In PVP we only allow hiding everyone or no one
-				return !(drawingUI ? hideOthers2D : hideOthers);
-			}
-
 			if (hideAttackers && player.getInteracting() == local)
 			{
 				return false; // hide
@@ -191,7 +188,7 @@ public class EntityHiderPlugin extends Plugin
 			}
 
 			// dead npcs can also be interacting so prioritize it over the interacting check
-			if (NpcUtil.isDying(npc) && hideDeadNpcs)
+			if (npcUtil.isDying(npc) && hideDeadNpcs)
 			{
 				return false;
 			}
@@ -213,6 +210,26 @@ public class EntityHiderPlugin extends Plugin
 		else if (renderable instanceof Projectile)
 		{
 			return !hideProjectiles;
+		}
+		else if (renderable instanceof GraphicsObject)
+		{
+			if (!hideDeadNpcs)
+			{
+				return true;
+			}
+
+			switch (((GraphicsObject) renderable).getId())
+			{
+				case GraphicID.MELEE_NYLO_DEATH:
+				case GraphicID.RANGE_NYLO_DEATH:
+				case GraphicID.MAGE_NYLO_DEATH:
+				case GraphicID.MELEE_NYLO_EXPLOSION:
+				case GraphicID.RANGE_NYLO_EXPLOSION:
+				case GraphicID.MAGE_NYLO_EXPLOSION:
+					return false;
+				default:
+					return true;
+			}
 		}
 
 		return true;

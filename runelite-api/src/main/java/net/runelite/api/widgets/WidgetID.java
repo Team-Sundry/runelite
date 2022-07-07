@@ -655,6 +655,11 @@ public final class WidgetID
 		static final int POINTS_INFOBOX = 3;
 	}
 
+	static class ChambersOfXericStorageUnitPrivate
+	{
+		static final int PRIVATE_CHEST_ITEM_CONTAINER = 6;
+	}
+
 	static class Tob
 	{
 		static final int PARTY_INTERFACE = 5;
@@ -761,7 +766,7 @@ public final class WidgetID
 
 	static class Minigames
 	{
-		static final int TELEPORT_BUTTON = 26;
+		static final int TELEPORT_BUTTON = 30;
 	}
 
 	static class StandardSpellBook

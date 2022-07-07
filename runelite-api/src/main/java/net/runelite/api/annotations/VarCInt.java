@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
+ * Copyright (c) 2022, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,15 +22,17 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.party.messages;
+package net.runelite.api.annotations;
 
-import java.util.UUID;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import net.runelite.api.VarClientInt;
+import org.intellij.lang.annotations.MagicConstant;
 
-@Value
-@EqualsAndHashCode(callSuper = true)
-public class UserPart extends WebsocketMessage
+@MagicConstant(valuesFromClass = VarClientInt.class)
+@Documented
+@Retention(RetentionPolicy.SOURCE)
+public @interface VarCInt
 {
-	private final UUID memberId;
 }

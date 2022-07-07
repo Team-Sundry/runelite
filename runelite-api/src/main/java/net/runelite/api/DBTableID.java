@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2022 Abex
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,13 +22,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.party.messages;
+package net.runelite.api;
 
-import java.util.UUID;
-import lombok.Data;
-
-@Data
-public class Handshake extends WebsocketMessage
+public final class DBTableID
 {
-	private UUID session;
+	public interface Quest
+	{
+		int NAME = 2;
+	}
 }

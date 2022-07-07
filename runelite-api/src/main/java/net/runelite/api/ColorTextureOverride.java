@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Tomas Slusny <slusnucky@gmail.com>
+ * Copyright (c) 2022, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,8 +22,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.party.messages;
+package net.runelite.api;
 
-public class Part extends WebsocketMessage
+/**
+ * Represents overridden color/texture replacements for an item. These overrides are used instead
+ * of the normal ones configured in the item composition.
+ */
+public interface ColorTextureOverride
 {
+	short[] getColorToReplaceWith();
+
+	short[] getTextureToReplaceWith();
 }

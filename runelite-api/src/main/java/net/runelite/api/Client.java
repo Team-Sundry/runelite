@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.runelite.api.annotations.VarCInt;
+import net.runelite.api.annotations.VarCStr;
 import net.runelite.api.annotations.Varbit;
 import net.runelite.api.annotations.VisibleForDevtools;
 import net.runelite.api.annotations.VisibleForExternalPlugins;
@@ -766,12 +768,21 @@ public interface Client extends OAuthApi, GameEngine
 	int[][] getXteaKeys();
 
 	/**
-	 * Gets an array of all client variables.
+	 * Gets an array of all client varplayers.
 	 *
 	 * @return local player variables
 	 */
 	@VisibleForDevtools
 	int[] getVarps();
+
+	/**
+	 * Get an array of all server varplayers. These vars are only
+	 * modified by the server, and so represent the server's idea of
+	 * the varp values.
+	 * @return the server varps
+	 */
+	@VisibleForDevtools
+	int[] getServerVarps();
 
 	/**
 	 * Gets an array of all client variables.
@@ -788,6 +799,17 @@ public interface Client extends OAuthApi, GameEngine
 	int getVar(VarPlayer varPlayer);
 
 	/**
+	 * Gets the value corresponding to the passed player variable.
+	 * This returns the server's idea of the value, not the client's. This is
+	 * specifically the last value set by the server regardless of changes to
+	 * the var by the client.
+	 *
+	 * @param varPlayer the player variable
+	 * @return the value
+	 */
+	int getServerVar(VarPlayer varPlayer);
+
+	/**
 	 * Gets a value corresponding to the passed varbit.
 	 *
 	 * @param varbit the varbit id
@@ -798,7 +820,7 @@ public interface Client extends OAuthApi, GameEngine
 	int getVar(@Varbit int varbit);
 
 	/**
-	 * Gets a value corresponding to the passed varbit.
+	 * Gets the value of the given varbit.
 	 *
 	 * @param varbit the varbit id
 	 * @return the value
@@ -806,20 +828,14 @@ public interface Client extends OAuthApi, GameEngine
 	int getVarbitValue(@Varbit int varbit);
 
 	/**
-	 * Gets an int value corresponding to the passed variable.
-	 *
-	 * @param varClientInt the variable
+	 * Gets the value of the given varbit.
+	 * This returns the server's idea of the value, not the client's. This is
+	 * specifically the last value set by the server regardless of changes to
+	 * the var by the client.
+	 * @param varbit the varbit id
 	 * @return the value
 	 */
-	int getVar(VarClientInt varClientInt);
-
-	/**
-	 * Gets a String value corresponding to the passed variable.
-	 *
-	 * @param varClientStr the variable
-	 * @return the value
-	 */
-	String getVar(VarClientStr varClientStr);
+	int getServerVarbitValue(@Varbit int varbit);
 
 	/**
 	 * Gets the value of a given VarPlayer.
@@ -831,32 +847,48 @@ public interface Client extends OAuthApi, GameEngine
 	int getVarpValue(int varpId);
 
 	/**
-	 * Gets the value of a given VarClientInt
+	 * Gets the value of a given VarPlayer.
+	 * This returns the server's idea of the value, not the client's. This is
+	 * specifically the last value set by the server regardless of changes to
+	 * the var by the client.
 	 *
-	 * @param varcIntId the VarClientInt id
+	 * @param varpId the VarPlayer id
 	 * @return the value
 	 */
 	@VisibleForExternalPlugins
-	int getVarcIntValue(int varcIntId);
+	int getServerVarpValue(int varpId);
+
+	/**
+	 * Gets the value of a given VarClientInt
+	 *
+	 * @param var the {@link VarClientInt}
+	 * @return the value
+	 */
+	int getVarcIntValue(@VarCInt int var);
 
 	/**
 	 * Gets the value of a given VarClientStr
 	 *
-	 * @param varcStrId the VarClientStr id
+	 * @param var the {@link VarClientStr}
 	 * @return the value
 	 */
-	@VisibleForExternalPlugins
-	String getVarcStrValue(int varcStrId);
+	String getVarcStrValue(@VarCStr int var);
 
 	/**
 	 * Sets a VarClientString to the passed value
+	 *
+	 * @param var the {@link VarClientStr}
+	 * @param value the new value
 	 */
-	void setVar(VarClientStr varClientStr, String value);
+	void setVarcStrValue(@VarCStr int var, String value);
 
 	/**
 	 * Sets a VarClientInt to the passed value
+	 *
+	 * @param var the {@link VarClientInt}
+	 * @param value the new value
 	 */
-	void setVar(VarClientInt varClientStr, int value);
+	void setVarcIntValue(@VarCInt int var, int value);
 
 	/**
 	 * Sets the value of a varbit
@@ -998,6 +1030,11 @@ public interface Client extends OAuthApi, GameEngine
 	 * Gets the client's cache of in memory struct compositions
 	 */
 	NodeCache getStructCompositionCache();
+
+	/**
+	 * Gets a entry out of a DBTable Row
+	 */
+	Object getDBTableField(int rowID, int column, int tupleIndex, int fieldIndex);
 
 	/**
 	 * Gets an array of all world areas
